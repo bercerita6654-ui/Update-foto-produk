@@ -111,63 +111,85 @@
                 </div>
             </div>
             
-            <!-- Footer -->
-            <div class="px-6 py-4 mt-4 md:mt-0 border-t border-slate-100 bg-transparent md:bg-slate-50 text-xs text-slate-500 flex justify-between items-center rounded-2xl md:rounded-none bg-white shadow-sm md:shadow-none border md:border-none">
-                <span id="productCount">Menampilkan 0 produk</span>
-                <span class="flex items-center gap-1 font-mono">
-                    <i data-lucide="folder" class="w-3 h-3"></i> 1Ozwm3WQO...
-                </span>
+            <!-- Footer / Pagination -->
+            <div class="px-6 py-4 mt-4 md:mt-0 border-t border-slate-100 bg-transparent md:bg-slate-50 text-xs text-slate-600 flex flex-col md:flex-row justify-between items-center gap-4 rounded-2xl md:rounded-none bg-white shadow-sm md:shadow-none border md:border-none">
+                <div class="flex items-center gap-2 w-full md:w-auto justify-between">
+                    <span id="productCountInfo">Menampilkan 0 produk</span>
+                    <select id="itemsPerPageSelect" onchange="changeItemsPerPage(this.value)" class="bg-white border border-slate-300 text-slate-700 py-1.5 px-2 rounded-lg outline-none focus:border-blue-500 font-medium">
+                        <option value="10">10 / halaman</option>
+                        <option value="20">20 / halaman</option>
+                        <option value="50">50 / halaman</option>
+                        <option value="100">100 / halaman</option>
+                    </select>
+                </div>
+                
+                <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+                    <span id="pageInfo" class="font-medium bg-slate-100 px-2.5 py-1 rounded-md">Halaman 1 dari 1</span>
+                    <div class="flex items-center gap-2">
+                        <button id="btnPrevPage" onclick="changePage(-1)" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:bg-slate-100 disabled:cursor-not-allowed flex items-center gap-1 transition-colors font-medium">
+                            <i data-lucide="chevron-left" class="w-4 h-4"></i> Prev
+                        </button>
+                        <button id="btnNextPage" onclick="changePage(1)" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:bg-slate-100 disabled:cursor-not-allowed flex items-center gap-1 transition-colors font-medium">
+                            Next <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
 
     <!-- Modal Kamera / Upload -->
     <div id="cameraModal" class="fixed inset-0 z-50 hidden flex items-end md:items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-t-3xl md:rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-transform translate-y-full md:translate-y-0" id="modalContent">
+        <div class="bg-white rounded-t-3xl md:rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-transform translate-y-full md:translate-y-0 flex flex-col max-h-[90vh]" id="modalContent">
             
-            <div class="flex justify-between items-center p-5 border-b border-slate-100">
-                <h2 class="text-lg font-bold text-slate-900">Ambil Foto Produk</h2>
+            <div class="flex justify-between items-center p-5 border-b border-slate-100 shrink-0">
+                <h2 class="text-lg font-bold text-slate-900">Upload Foto Produk</h2>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition-colors">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
             
-            <div class="p-6">
+            <div class="p-6 overflow-y-auto flex-1 no-scrollbar">
                 <!-- Info Target -->
-                <div class="mb-6 bg-blue-50 p-4 rounded-xl border border-blue-100 flex gap-4 items-center">
+                <div class="mb-5 bg-blue-50 p-4 rounded-xl border border-blue-100 flex gap-4 items-center">
                     <div class="bg-white p-2 rounded-lg shadow-sm">
-                        <i data-lucide="file-image" class="w-6 h-6 text-blue-600"></i>
+                        <i data-lucide="folder-output" class="w-6 h-6 text-blue-600"></i>
                     </div>
                     <div>
-                        <div class="text-xs text-blue-600/80 font-semibold uppercase tracking-wider mb-0.5">Target Nama File</div>
-                        <div id="modalSkuLabel" class="font-mono font-bold text-lg text-blue-700"></div>
-                        <div id="modalNameLabel" class="text-sm text-slate-600 mt-1 line-clamp-1"></div>
+                        <div class="text-xs text-blue-600/80 font-semibold uppercase tracking-wider mb-0.5">Target Folder Drive</div>
+                        <div class="font-mono font-bold text-[10px] text-blue-700 break-all leading-tight">1Ozwm3WQO_7fST6Jsla0KtmXzz4DeW6lG</div>
+                        <div id="modalSkuLabel" class="text-xs text-slate-600 mt-1 font-medium bg-blue-100/50 inline-block px-1.5 rounded"></div>
                     </div>
                 </div>
 
                 <!-- Area Preview & Tombol Kamera -->
                 <div class="mb-6">
-                    <!-- Input file tersembunyi dengan mode kamera -->
-                    <!-- accept="image/*" dan capture="environment" akan membuka kamera belakang di HP -->
-                    <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handlePhotoCapture(event)">
+                    <!-- Input file tersembunyi dengan multiple dan mode kamera -->
+                    <input type="file" id="cameraInput" accept="image/*" capture="environment" multiple class="hidden" onchange="handlePhotoCapture(event)">
                     
-                    <div id="previewContainer" class="hidden relative w-full aspect-square mb-4 rounded-2xl overflow-hidden bg-slate-100 border-2 border-slate-200 shadow-inner">
-                        <img id="photoPreview" src="" alt="Preview" class="w-full h-full object-cover">
-                        <button onclick="openCamera()" class="absolute bottom-4 right-4 bg-slate-900/70 backdrop-blur text-white px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-slate-900 transition-colors">
-                            <i data-lucide="refresh-cw" class="w-4 h-4"></i> Foto Ulang
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="text-sm font-bold text-slate-700">Daftar Foto (<span id="photoCountLabel">0</span>/5)</label>
+                        <button id="btnTambahFotoMini" onclick="openCamera()" class="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition-colors">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Tambah Foto
                         </button>
                     </div>
 
-                    <div id="emptyStateContainer" class="w-full aspect-square mb-4 rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center bg-slate-50 gap-3">
+                    <!-- Grid Preview -->
+                    <div id="previewGrid" class="grid grid-cols-3 gap-2 mb-4 hidden">
+                        <!-- Thumnails masuk kesini -->
+                    </div>
+
+                    <!-- State Kosong -->
+                    <div id="emptyStateContainer" class="w-full aspect-video mb-4 rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center bg-slate-50 gap-3">
                         <div class="bg-blue-100 text-blue-600 p-4 rounded-full">
-                            <i data-lucide="camera" class="w-8 h-8"></i>
+                            <i data-lucide="images" class="w-8 h-8"></i>
                         </div>
-                        <p class="text-sm text-slate-500 font-medium">Belum ada foto</p>
+                        <p class="text-sm text-slate-500 font-medium">Bisa pilih maksimal 5 foto</p>
                     </div>
 
                     <button id="btnOpenCamera" onclick="openCamera()" class="w-full flex justify-center items-center gap-2 py-3.5 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold transition-colors shadow-sm">
                         <i data-lucide="camera" class="w-5 h-5"></i>
-                        Buka Kamera
+                        Buka Kamera / Galeri
                     </button>
                 </div>
 
@@ -180,33 +202,70 @@
                     id="btnUpload"
                     onclick="simulateUpload()"
                     disabled
-                    class="w-full flex justify-center items-center gap-2 py-3.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-blue-600 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors"
+                    class="w-full flex justify-center items-center gap-2 py-3.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-blue-600 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors shrink-0"
                 >
                     <i data-lucide="upload-cloud" class="w-5 h-5"></i>
-                    <span id="btnUploadText">Simpan Foto [SKU].png</span>
+                    <span id="btnUploadText">Simpan Foto</span>
                 </button>
-                
-                <p class="text-[11px] text-center text-slate-400 mt-3">
-                    *Karena batasan keamanan browser, fitur ini hanya memvisualisasikan foto di perangkat Anda. Upload riil ke G-Drive membutuhkan backend API.
-                </p>
             </div>
+        </div>
+    </div>
+
+    <!-- Photo Popup Modal (Untuk memperbesar foto & Slider) -->
+    <div id="photoPopupModal" class="fixed inset-0 z-[60] hidden flex flex-col bg-slate-900/95 backdrop-blur-md transition-opacity" onclick="closePhotoPopup()">
+        <!-- Header Popup -->
+        <div class="flex justify-between items-center p-4 text-white shrink-0" onclick="event.stopPropagation()">
+            <div id="popupTitle" class="font-bold text-sm bg-slate-800/80 px-3 py-1.5 rounded-lg border border-white/10">SKU_1.png</div>
+            <button onclick="closePhotoPopup()" class="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors backdrop-blur-sm">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+        
+        <!-- Area Gambar -->
+        <div class="flex-1 relative flex justify-center items-center overflow-hidden px-4" onclick="event.stopPropagation()">
+            <img id="zoomedPhoto" src="" alt="Zoomed Photo" class="max-h-full max-w-full object-contain drop-shadow-2xl transition-transform duration-300">
+            
+            <!-- Tombol Navigasi Kiri Kanan -->
+            <button id="btnPopupPrev" onclick="navPopup(-1)" class="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white p-3 rounded-full backdrop-blur-md transition-all">
+                <i data-lucide="chevron-left" class="w-6 h-6"></i>
+            </button>
+            <button id="btnPopupNext" onclick="navPopup(1)" class="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white p-3 rounded-full backdrop-blur-md transition-all">
+                <i data-lucide="chevron-right" class="w-6 h-6"></i>
+            </button>
+        </div>
+
+        <!-- Footer Popup (Counter) -->
+        <div class="p-4 text-center shrink-0" onclick="event.stopPropagation()">
+            <span id="popupCounter" class="text-sm font-medium text-white/80 bg-black/40 px-4 py-1.5 rounded-full backdrop-blur-md">1 / 1</span>
         </div>
     </div>
 
     <script>
         // --- Konfigurasi ---
-        // Acuan Katalog Produk Utama
         const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8ACyi03DJ77mANO19x_hJV82Xs8rNBBLyT9IIGc1tgYGNrv9WMufjm940iEPx4QU6Eta6T8Ekv2-X/pub?gid=1285691610&single=true&output=csv';
-        // Acuan Database Tugas Harian (Task)
         const TASK_CSV_URL = 'https://docs.google.com/spreadsheets/d/1LhlFxhO9nbrRanJkuRsx_iRtMfvp5f4g8AFaDSIyOsg/export?format=csv';
         
         // --- State Global ---
         let allProducts = [];
-        let localPhotos = {}; // Menyimpan pratinjau foto secara lokal: { "SKU123": "blob:url..." }
+        let filteredProductsList = []; 
+        let localPhotos = {}; // Sekarang menyimpan ARRAY: { "SKU123": ["blob:1", "blob:2"] }
+        
+        // Modal Upload State
         let currentActiveSku = null;
-        let currentActivePhoto = null;
-        let activeTab = 'all'; // 'all' atau 'tasks'
-        let dailyTasks = new Set(JSON.parse(localStorage.getItem('dailyTasks') || '[]')); // Menyimpan SKU task
+        let currentActivePhotos = []; // Array foto saat modal upload aktif
+        const MAX_PHOTOS = 5;
+        
+        // Task & Tab State
+        let activeTab = 'all'; 
+        let dailyTasks = new Set(JSON.parse(localStorage.getItem('dailyTasks') || '[]')); 
+        
+        // Pagination State
+        let currentPage = 1;
+        let itemsPerPage = 10;
+
+        // Popup Slider State
+        let popupSku = null;
+        let popupIndex = 0;
 
         // --- Inisialisasi ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -218,10 +277,9 @@
         // --- Fetch & Parse Data ---
         async function fetchData() {
             try {
-                // Menarik data katalog produk utama dan data task secara bersamaan
                 const [catalogResponse, taskResponse] = await Promise.all([
                     fetch(CSV_URL),
-                    fetch(TASK_CSV_URL).catch(() => null) // Ignore error jika akses task ditolak/belum diset publik
+                    fetch(TASK_CSV_URL).catch(() => null)
                 ]);
 
                 if (!catalogResponse.ok) throw new Error('Gagal mengakses data CSV Produk');
@@ -229,18 +287,15 @@
                 const csvText = await catalogResponse.text();
                 allProducts = parseCSV(csvText);
 
-                // Mengolah data Task jika berhasil ditarik
                 if (taskResponse && taskResponse.ok) {
                     const taskCsvText = await taskResponse.text();
                     const taskSkus = parseTaskCSV(taskCsvText);
-                    
-                    // Gabungkan task dari spreadsheet database dengan task lokal (jika ada)
                     taskSkus.forEach(sku => dailyTasks.add(sku));
                     localStorage.setItem('dailyTasks', JSON.stringify([...dailyTasks]));
                     updateTaskBadge();
                 }
                 
-                renderTable(allProducts);
+                handleSearch();
             } catch (error) {
                 console.error(error);
                 document.getElementById('loadingRow').style.display = 'none';
@@ -255,9 +310,8 @@
             
             const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, '').toLowerCase());
             
-            const data = lines.slice(1).map(line => {
+            return lines.slice(1).map(line => {
                 if(!line.trim()) return null;
-                // Regex memisahkan koma yang tidak berada di dalam tanda kutip ganda
                 const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                 const obj = {};
                 
@@ -276,29 +330,21 @@
                 
                 return obj;
             }).filter(p => p && p.sku && p.nama);
-
-            return data;
         }
 
-        // Fungsi khusus membaca SKU dari file Tugas (Task CSV)
         function parseTaskCSV(str) {
             const lines = str.split('\n');
             if (lines.length < 2) return [];
-
-            // Cari index kolom SKU di spreadsheet Tugas
             const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, '').toLowerCase());
             const skuIndex = headers.findIndex(h => h.includes('sku'));
-            
-            if (skuIndex === -1) return []; // Jika tidak ada kolom bersuara 'sku', kembali kosong
+            if (skuIndex === -1) return []; 
 
             const skus = [];
             for (let i = 1; i < lines.length; i++) {
                 const line = lines[i];
                 if (!line.trim()) continue;
                 const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                if (values[skuIndex]) {
-                    skus.push(values[skuIndex].trim().replace(/"/g, ''));
-                }
+                if (values[skuIndex]) skus.push(values[skuIndex].trim().replace(/"/g, ''));
             }
             return skus;
         }
@@ -309,27 +355,31 @@
             tbody.innerHTML = '';
 
             if (products.length === 0) {
-                tbody.innerHTML = `
-                    <div class="px-6 py-12 text-center text-slate-500 md:bg-white bg-slate-50 rounded-2xl border border-dashed border-slate-300 md:border-none md:rounded-none">
-                        Tidak ada produk ditemukan.
-                    </div>
-                `;
-                document.getElementById('productCount').innerText = `Menampilkan 0 produk`;
+                tbody.innerHTML = `<div class="px-6 py-12 text-center text-slate-500 md:bg-white bg-slate-50 rounded-2xl border border-dashed border-slate-300 md:border-none md:rounded-none">Tidak ada produk ditemukan di halaman ini.</div>`;
+                lucide.createIcons();
                 return;
             }
 
             products.forEach(product => {
                 const div = document.createElement('div');
-                // Menggunakan Card Style di Mobile, dan Row Style di Desktop
                 div.className = "group bg-white p-4 rounded-2xl shadow-sm border border-slate-200 md:border-none md:shadow-none md:rounded-none md:p-0 md:hover:bg-blue-50/50 transition-colors flex flex-col md:flex-row md:items-center";
                 
-                // Cek apakah ada foto lokal untuk produk ini
-                const hasPhoto = localPhotos[product.sku];
-                const photoHtml = hasPhoto 
-                    ? `<img src="${hasPhoto}" class="w-full h-full object-cover">`
-                    : `<i data-lucide="image" class="text-slate-300 w-6 h-6 md:w-5 md:h-5"></i>`;
+                // Ambil ARRAY foto untuk SKU ini
+                const photos = localPhotos[product.sku] || [];
+                const hasPhoto = photos.length > 0;
+                
+                let photoHtml = '';
+                if (hasPhoto) {
+                    // Tampilkan foto pertama sebagai thumbnail
+                    photoHtml = `<img src="${photos[0]}" class="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity" onclick="openPhotoPopup('${product.sku}')" title="Klik untuk memperbesar">`;
+                    // Badge penunjuk jumlah jika lebih dari 1
+                    if (photos.length > 1) {
+                        photoHtml += `<div class="absolute bottom-0 right-0 bg-slate-900/80 text-white text-[10px] px-1.5 py-0.5 rounded-tl-lg font-bold backdrop-blur-sm pointer-events-none">+${photos.length - 1}</div>`;
+                    }
+                } else {
+                    photoHtml = `<i data-lucide="image" class="text-slate-300 w-6 h-6 md:w-5 md:h-5"></i>`;
+                }
 
-                // Status Task & Stok
                 const isTask = dailyTasks.has(product.sku);
                 const stokNum = parseInt(product.stok) || 0;
                 const badgeClass = stokNum > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
@@ -338,9 +388,9 @@
                     <div class="flex items-start md:items-center gap-4 flex-1">
                         <!-- Foto -->
                         <div class="md:px-6 md:py-3 md:w-28 shrink-0 flex justify-center">
-                            <div class="h-20 w-20 md:h-12 md:w-12 rounded-xl md:rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden relative">
+                            <div class="h-20 w-20 md:h-12 md:w-12 rounded-xl md:rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden relative group-hover:border-blue-300 transition-colors">
                                 ${photoHtml}
-                                ${isTask ? '<div class="absolute top-0 right-0 bg-amber-500 text-white p-0.5 rounded-bl-lg rounded-tr-xl md:rounded-tr-lg"><i data-lucide="bookmark" class="w-3 h-3 md:w-2.5 md:h-2.5 fill-current"></i></div>' : ''}
+                                ${isTask ? '<div class="absolute top-0 left-0 bg-amber-500 text-white p-0.5 rounded-br-lg pointer-events-none"><i data-lucide="bookmark" class="w-3 h-3 md:w-2.5 md:h-2.5 fill-current"></i></div>' : ''}
                             </div>
                         </div>
                         
@@ -368,34 +418,66 @@
                         </button>
                         <button onclick="openModal('${product.sku}', '${product.nama.replace(/'/g, "\\'")}')" 
                                 class="flex-[2] md:flex-none inline-flex justify-center items-center gap-1.5 bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white border border-blue-200 hover:border-transparent px-3 py-2.5 md:py-2 rounded-xl md:rounded-lg text-sm md:text-xs font-bold transition-all shadow-sm">
-                            <i data-lucide="camera" class="w-4 h-4 md:w-3.5 md:h-3.5"></i>
-                            ${hasPhoto ? 'Ubah Foto' : 'Ambil Foto'}
+                            <i data-lucide="${hasPhoto ? 'images' : 'camera'}" class="w-4 h-4 md:w-3.5 md:h-3.5"></i>
+                            ${hasPhoto ? 'Kelola Foto' : 'Ambil Foto'}
                         </button>
                     </div>
                 `;
                 tbody.appendChild(div);
             });
 
-            document.getElementById('productCount').innerText = `Menampilkan ${products.length} produk`;
-            lucide.createIcons(); // Re-init icons for dynamic content
+            lucide.createIcons();
         }
 
+        // --- Logika Filter & Pagination ---
         function handleSearch() {
             const term = document.getElementById('searchInput').value.toLowerCase();
-            
-            // Filter berdasarkan Tab
-            let filtered = allProducts;
+            filteredProductsList = allProducts;
             if (activeTab === 'tasks') {
-                filtered = filtered.filter(p => dailyTasks.has(p.sku));
+                filteredProductsList = filteredProductsList.filter(p => dailyTasks.has(p.sku));
             }
-
-            // Filter berdasarkan Pencarian
-            filtered = filtered.filter(p => 
+            filteredProductsList = filteredProductsList.filter(p => 
                 (p.sku && p.sku.toLowerCase().includes(term)) ||
                 (p.nama && p.nama.toLowerCase().includes(term)) ||
                 (p.merk && p.merk.toLowerCase().includes(term))
             );
-            renderTable(filtered);
+            currentPage = 1;
+            renderPage(); 
+        }
+
+        function renderPage() {
+            const totalItems = filteredProductsList.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+            
+            if (currentPage < 1) currentPage = 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+            const productsToRender = filteredProductsList.slice(startIndex, endIndex);
+            
+            const startDisplay = totalItems === 0 ? 0 : startIndex + 1;
+            document.getElementById('productCountInfo').innerText = `Menampilkan ${startDisplay} - ${endIndex} dari ${totalItems}`;
+            document.getElementById('pageInfo').innerText = `Halaman ${currentPage} / ${totalPages}`;
+            
+            document.getElementById('btnPrevPage').disabled = (currentPage === 1);
+            document.getElementById('btnNextPage').disabled = (currentPage === totalPages);
+
+            renderTable(productsToRender);
+            if (currentPage > 1) {
+               document.getElementById('searchInput').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function changePage(delta) {
+            currentPage += delta;
+            renderPage();
+        }
+
+        function changeItemsPerPage(val) {
+            itemsPerPage = parseInt(val);
+            currentPage = 1; 
+            renderPage();
         }
 
         // --- Logika Task & Tabs ---
@@ -412,27 +494,21 @@
                 tabTasks.className = "shrink-0 px-4 py-2.5 bg-slate-800 text-white rounded-xl text-sm font-semibold shadow-sm transition-all flex items-center gap-2";
             }
             
-            handleSearch(); // Render ulang
+            handleSearch();
         }
 
         function toggleTask(sku) {
-            if (dailyTasks.has(sku)) {
-                dailyTasks.delete(sku);
-            } else {
-                dailyTasks.add(sku);
-            }
+            if (dailyTasks.has(sku)) dailyTasks.delete(sku);
+            else dailyTasks.add(sku);
             
-            // Simpan ke Local Storage agar tidak hilang saat direfresh
             localStorage.setItem('dailyTasks', JSON.stringify([...dailyTasks]));
-            
             updateTaskBadge();
-            handleSearch(); // Render ulang UI
+            handleSearch();
         }
 
         function updateTaskBadge() {
             const badge = document.getElementById('taskCountBadge');
             badge.innerText = dailyTasks.size;
-            
             if (dailyTasks.size > 0) {
                 badge.classList.replace('bg-slate-100', 'bg-amber-100');
                 badge.classList.replace('text-slate-600', 'text-amber-700');
@@ -442,35 +518,60 @@
             }
         }
 
-        // --- Logika Modal & Kamera ---
+        // --- Logika Fitur Memperbesar Foto & Slider ---
+        function openPhotoPopup(sku) {
+            const photos = localPhotos[sku];
+            if (!photos || photos.length === 0) return;
+
+            popupSku = sku;
+            popupIndex = 0;
+            
+            updatePopupView();
+            document.getElementById('photoPopupModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; 
+        }
+
+        function updatePopupView() {
+            const photos = localPhotos[popupSku];
+            document.getElementById('zoomedPhoto').src = photos[popupIndex];
+            document.getElementById('popupTitle').innerText = `${popupSku}_${popupIndex + 1}.png`;
+            document.getElementById('popupCounter').innerText = `${popupIndex + 1} / ${photos.length}`;
+
+            // Tampilkan/Sembunyikan tombol navigasi jika lebih dari 1 foto
+            const showNav = photos.length > 1;
+            document.getElementById('btnPopupPrev').style.display = showNav ? 'block' : 'none';
+            document.getElementById('btnPopupNext').style.display = showNav ? 'block' : 'none';
+        }
+
+        function navPopup(direction) {
+            const photos = localPhotos[popupSku];
+            popupIndex = (popupIndex + direction + photos.length) % photos.length;
+            updatePopupView();
+        }
+
+        function closePhotoPopup() {
+            document.getElementById('photoPopupModal').classList.add('hidden');
+            document.body.style.overflow = 'auto'; 
+            setTimeout(() => {
+                document.getElementById('zoomedPhoto').src = '';
+            }, 300);
+        }
+
+        // --- Logika Modal & Kamera (Upload) ---
         function openModal(sku, nama) {
             currentActiveSku = sku;
-            currentActivePhoto = null; // Reset foto sementara
+            // Salin array foto (agar batal jika tidak disimpan)
+            currentActivePhotos = localPhotos[sku] ? [...localPhotos[sku]] : []; 
             
-            // Set Text
-            document.getElementById('modalSkuLabel').innerText = `${sku}.png`;
-            document.getElementById('modalNameLabel').innerText = nama;
-            document.getElementById('btnUploadText').innerText = `Simpan ${sku}.png`;
+            document.getElementById('modalSkuLabel').innerText = `Target: ${sku}_[1-5].png`;
             
-            // Reset UI State
             document.getElementById('successMessage').classList.add('hidden');
-            document.getElementById('btnUpload').disabled = true;
             
-            // Tampilkan foto yang sudah ada (jika pernah difoto)
-            if (localPhotos[sku]) {
-                showPreview(localPhotos[sku]);
-                document.getElementById('btnOpenCamera').innerHTML = `<i data-lucide="camera" class="w-5 h-5"></i> Ganti Foto`;
-            } else {
-                hidePreview();
-                document.getElementById('btnOpenCamera').innerHTML = `<i data-lucide="camera" class="w-5 h-5"></i> Buka Kamera`;
-            }
-            lucide.createIcons();
+            renderModalPreviews();
 
-            // Tampilkan modal dengan animasi
             const modal = document.getElementById('cameraModal');
             const content = document.getElementById('modalContent');
             modal.classList.remove('hidden');
-            // Sedikit delay agar transisi terlihat
             setTimeout(() => {
                 content.classList.remove('translate-y-full');
                 if(window.innerWidth < 768) content.classList.remove('md:translate-y-0');
@@ -484,64 +585,113 @@
             content.classList.add('translate-y-full');
             setTimeout(() => {
                 modal.classList.add('hidden');
-            }, 300); // Sesuai durasi transisi
+            }, 300);
         }
 
         function openCamera() {
-            // Ini akan memicu dialog kamera di HP atau file picker di Desktop
+            if (currentActivePhotos.length >= MAX_PHOTOS) {
+                alert('Maksimal 5 foto per produk!');
+                return;
+            }
             document.getElementById('cameraInput').click();
         }
 
         function handlePhotoCapture(event) {
-            const file = event.target.files[0];
-            if (file) {
-                // Membuat URL lokal dari file gambar yang difoto
-                const imageUrl = URL.createObjectURL(file);
-                currentActivePhoto = imageUrl;
-                showPreview(imageUrl);
-                document.getElementById('btnUpload').disabled = false;
+            const files = Array.from(event.target.files);
+            if (files.length === 0) return;
+
+            const remainingSlots = MAX_PHOTOS - currentActivePhotos.length;
+            const filesToAdd = files.slice(0, remainingSlots);
+
+            if (files.length > remainingSlots) {
+                alert(`Anda hanya dapat menambahkan ${remainingSlots} foto lagi untuk produk ini.`);
             }
-            // Reset value input agar bisa mengambil foto yang sama berulang kali jika perlu
+
+            filesToAdd.forEach(file => {
+                currentActivePhotos.push(URL.createObjectURL(file));
+            });
+
+            renderModalPreviews();
             event.target.value = '';
         }
 
-        function showPreview(url) {
-            document.getElementById('emptyStateContainer').classList.add('hidden');
-            document.getElementById('previewContainer').classList.remove('hidden');
-            document.getElementById('photoPreview').src = url;
-            document.getElementById('btnOpenCamera').classList.add('hidden'); // Sembunyikan tombol utama
+        function removeActivePhoto(index) {
+            currentActivePhotos.splice(index, 1);
+            renderModalPreviews();
         }
 
-        function hidePreview() {
-            document.getElementById('emptyStateContainer').classList.remove('hidden');
-            document.getElementById('previewContainer').classList.add('hidden');
-            document.getElementById('photoPreview').src = '';
-            document.getElementById('btnOpenCamera').classList.remove('hidden');
+        function renderModalPreviews() {
+            const grid = document.getElementById('previewGrid');
+            const emptyState = document.getElementById('emptyStateContainer');
+            const countLabel = document.getElementById('photoCountLabel');
+            const btnTambahMini = document.getElementById('btnTambahFotoMini');
+            const btnOpenCameraBig = document.getElementById('btnOpenCamera');
+            const btnUpload = document.getElementById('btnUpload');
+
+            countLabel.innerText = currentActivePhotos.length;
+
+            if (currentActivePhotos.length > 0) {
+                emptyState.classList.add('hidden');
+                grid.classList.remove('hidden');
+                
+                // Kondisi Full
+                if (currentActivePhotos.length >= MAX_PHOTOS) {
+                    btnTambahMini.classList.add('hidden');
+                    btnOpenCameraBig.classList.add('hidden');
+                } else {
+                    btnTambahMini.classList.remove('hidden');
+                    btnOpenCameraBig.classList.add('hidden'); // Sembunyikan yg besar jika udah ada isi
+                }
+
+                btnUpload.disabled = false;
+                btnUpload.innerText = `Simpan ${currentActivePhotos.length} Foto`;
+
+                // Render Thumbnails
+                grid.innerHTML = currentActivePhotos.map((url, i) => `
+                    <div class="relative aspect-square rounded-xl overflow-hidden border-2 border-slate-200 bg-slate-100 group">
+                        <img src="${url}" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <button onclick="removeActivePhoto(${i})" class="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-transform hover:scale-110">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div class="absolute bottom-1 left-1 bg-black/60 text-white text-[10px] px-1.5 rounded font-mono">${i+1}</div>
+                    </div>
+                `).join('');
+                
+            } else {
+                emptyState.classList.remove('hidden');
+                grid.classList.add('hidden');
+                btnTambahMini.classList.add('hidden');
+                btnOpenCameraBig.classList.remove('hidden');
+                
+                btnUpload.disabled = true;
+                btnUpload.innerText = `Simpan Foto`;
+            }
+
+            lucide.createIcons();
         }
 
         function simulateUpload() {
-            if (!currentActivePhoto || !currentActiveSku) return;
-
             const btn = document.getElementById('btnUpload');
-            const originalText = btn.innerHTML;
+            const originalText = btn.innerText;
             
-            // Animasi tombol
             btn.innerHTML = `<div class="loader !w-5 !h-5 !border-2 !border-white !border-t-transparent mr-2"></div> Menyimpan...`;
             btn.disabled = true;
 
-            // Simulasi proses upload 1 detik
             setTimeout(() => {
-                // Simpan ke state lokal
-                localPhotos[currentActiveSku] = currentActivePhoto;
+                // Simpan/Update state lokal
+                if (currentActivePhotos.length > 0) {
+                    localPhotos[currentActiveSku] = [...currentActivePhotos];
+                } else {
+                    delete localPhotos[currentActiveSku]; // Hapus jika dikosongkan
+                }
                 
-                // Tampilkan sukses
-                btn.innerHTML = originalText;
+                btn.innerText = originalText;
                 document.getElementById('successMessage').classList.remove('hidden');
                 
-                // Update tabel utama di latar belakang
-                handleSearch(); // Render ulang sesuai pencarian saat ini
+                renderPage(); 
                 
-                // Tutup modal otomatis
                 setTimeout(() => {
                     closeModal();
                 }, 1500);
