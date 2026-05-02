@@ -719,11 +719,22 @@
         }
 
         function toggleTask(sku) {
-            if (dailyTasks.has(sku)) dailyTasks.delete(sku);
-            else dailyTasks.add(sku);
+            let isRemoving = dailyTasks.has(sku);
+            
+            if (isRemoving) {
+                dailyTasks.delete(sku);
+            } else {
+                dailyTasks.add(sku);
+            }
+            
             localStorage.setItem('dailyTasks', JSON.stringify([...dailyTasks]));
             updateTaskBadge();
             handleSearch();
+            
+            // Otomatis sinkronisasi ke Google Sheets saat tugas dihapus
+            if (isRemoving) {
+                syncTasksToCloud();
+            }
         }
 
         function updateTaskBadge() {
