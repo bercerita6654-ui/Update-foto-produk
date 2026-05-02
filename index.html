@@ -2,7 +2,11 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4338ca">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Manajer Foto Produk</title>
     <!-- Tailwind CSS untuk styling -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -171,7 +175,8 @@
 
                 <!-- Area Preview & Tombol Kamera -->
                 <div class="mb-8">
-                    <input type="file" id="cameraInput" accept="image/*" capture="environment" multiple class="hidden" onchange="handlePhotoCapture(event)">
+                    <!-- capture="environment" dihapus agar OS HP bisa memunculkan opsi Galeri / Kamera secara stabil -->
+                    <input type="file" id="cameraInput" accept="image/jpeg, image/png, image/webp" multiple class="hidden" onchange="handlePhotoCapture(event)">
                     
                     <div class="flex justify-between items-end mb-4 px-1">
                         <div>
@@ -257,7 +262,7 @@
         
         // --- Konfigurasi Google API (OAuth2 Langsung) ---
         const CLIENT_ID = '482253857327-8jp0c75kqp27t333csghk6ldj1o6fm1c.apps.googleusercontent.com';
-        const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.readonly';
+        const SCOPES = 'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/spreadsheets';
         const DRIVE_FOLDER_ID = '1Ozwm3WQO_7fST6Jsla0KtmXzz4DeW6lG';
         const TASK_SHEET_ID = '1LhlFxhO9nbrRanJkuRsx_iRtMfvp5f4g8AFaDSIyOsg';
         
@@ -358,6 +363,14 @@
             lucide.createIcons();
             updateTaskBadge();
             
+            // Force re-login untuk pembaruan scope (izin akses folder Drive penuh)
+            const APP_VER = '1.2';
+            if (localStorage.getItem('appVer') !== APP_VER) {
+                localStorage.removeItem('driveAccessToken');
+                localStorage.removeItem('driveTokenExpiresAt');
+                localStorage.setItem('appVer', APP_VER);
+            }
+
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
                 scope: SCOPES,
