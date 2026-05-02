@@ -195,7 +195,7 @@
 
                 <!-- Tombol Simpan -->
                 <div id="successMessage" class="hidden flex items-center justify-center gap-2 text-green-700 bg-green-50 p-3.5 rounded-xl border border-green-200 font-medium mb-4">
-                    <i data-lucide="check-circle-2" class="w-5 h-5"></i> Foto disimpan (Simulasi)
+                    <i data-lucide="check-circle-2" class="w-5 h-5"></i> Foto berhasil diunggah!
                 </div>
 
                 <button
@@ -207,6 +207,10 @@
                     <i data-lucide="upload-cloud" class="w-5 h-5"></i>
                     <span id="btnUploadText">Simpan Foto</span>
                 </button>
+                
+                <p class="text-[11px] text-center text-slate-400 mt-3">
+                    *Foto akan diunggah secara langsung ke Google Drive Anda melalui sinkronisasi Apps Script.
+                </p>
             </div>
         </div>
     </div>
@@ -244,6 +248,7 @@
         // --- Konfigurasi ---
         const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8ACyi03DJ77mANO19x_hJV82Xs8rNBBLyT9IIGc1tgYGNrv9WMufjm940iEPx4QU6Eta6T8Ekv2-X/pub?gid=1285691610&single=true&output=csv';
         const TASK_CSV_URL = 'https://docs.google.com/spreadsheets/d/1LhlFxhO9nbrRanJkuRsx_iRtMfvp5f4g8AFaDSIyOsg/export?format=csv';
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbzUdXnI_aYSBzi_WdixJ14sxRfLgso3ztcwyXIQ6CkbyKMt7umSxjIB_GP6dXyy3_g84g/exec';
         
         // --- State Global ---
         let allProducts = [];
@@ -672,19 +677,58 @@
             lucide.createIcons();
         }
 
-        function simulateUpload() {
+        // Fungsi Helper untuk mengubah file blob menjadi string Base64
+        function blobToBase64(blob) {
+            return new Promise((resolve, _) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        async function simulateUpload() {
             const btn = document.getElementById('btnUpload');
             const originalText = btn.innerText;
             
-            btn.innerHTML = `<div class="loader !w-5 !h-5 !border-2 !border-white !border-t-transparent mr-2"></div> Menyimpan...`;
+            btn.innerHTML = `<div class="loader !w-5 !h-5 !border-2 !border-white !border-t-transparent mr-2"></div> Mengunggah...`;
             btn.disabled = true;
 
-            setTimeout(() => {
-                // Simpan/Update state lokal
+            try {
                 if (currentActivePhotos.length > 0) {
+                    // Loop untuk setiap foto dan unggah satu persatu
+                    for (let i = 0; i < currentActivePhotos.length; i++) {
+                        const blobUrl = currentActivePhotos[i];
+                        
+                        // Tarik file Blob asli dari memori lokal browser
+                        const response = await fetch(blobUrl);
+                        const blob = await response.blob();
+                        
+                        // Konversi menjadi Base64
+                        const base64data = await blobToBase64(blob);
+                        const base64String = base64data.split(',')[1]; // Buang prefix 'data:image/png;base64,'
+                        
+                        const payload = {
+                            sku: currentActiveSku,
+                            filename: `${currentActiveSku}_${i + 1}.png`,
+                            mimeType: blob.type,
+                            data: base64String
+                        };
+
+                        // Kirim POST Request ke Apps Script
+                        // Menggunakan text/plain agar tidak memicu error blokir CORS preflight di G-Script
+                        await fetch(GAS_URL, {
+                            method: 'POST',
+                            body: JSON.stringify(payload),
+                            headers: {
+                                'Content-Type': 'text/plain;charset=utf-8'
+                            }
+                        });
+                    }
+                    
+                    // Simpan pratinjau di layar lokal jika berhasil
                     localPhotos[currentActiveSku] = [...currentActivePhotos];
                 } else {
-                    delete localPhotos[currentActiveSku]; // Hapus jika dikosongkan
+                    delete localPhotos[currentActiveSku]; 
                 }
                 
                 btn.innerText = originalText;
@@ -696,7 +740,12 @@
                     closeModal();
                 }, 1500);
 
-            }, 1000);
+            } catch (error) {
+                console.error("Error Upload:", error);
+                alert("Gagal mengunggah foto. Pastikan internet stabil dan izin script sesuai.");
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
         }
     </script>
 </body>
