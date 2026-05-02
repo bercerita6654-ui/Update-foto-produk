@@ -65,12 +65,18 @@
     <main class="max-w-7xl mx-auto px-4 mt-6">
         
         <!-- Filter Tabs (Task Feature) -->
-        <div class="flex gap-2 mb-6 overflow-x-auto no-scrollbar pb-1">
-            <button id="tabAll" onclick="switchTab('all')" class="shrink-0 px-4 py-2.5 bg-slate-800 text-white rounded-xl text-sm font-semibold shadow-sm transition-all">Semua Produk</button>
-            <button id="tabTasks" onclick="switchTab('tasks')" class="shrink-0 px-4 py-2.5 bg-white text-slate-600 border border-slate-200 rounded-xl text-sm font-semibold hover:bg-slate-50 transition-all flex items-center gap-2">
-                <i data-lucide="list-todo" class="w-4 h-4"></i> Tugas Hari Ini
-                <span id="taskCountBadge" class="bg-slate-100 text-slate-600 py-0.5 px-2 rounded-full text-xs font-bold">0</span>
-            </button>
+        <div class="flex flex-col gap-2 mb-6">
+            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                <button id="tabAll" onclick="switchTab('all')" class="shrink-0 px-4 py-2.5 bg-slate-800 text-white rounded-xl text-sm font-semibold shadow-sm transition-all">Semua Produk</button>
+                <button id="tabTasks" onclick="switchTab('tasks')" class="shrink-0 px-4 py-2.5 bg-white text-slate-600 border border-slate-200 rounded-xl text-sm font-semibold hover:bg-slate-50 transition-all flex items-center gap-2">
+                    <i data-lucide="list-todo" class="w-4 h-4"></i> Tugas Hari Ini
+                    <span id="taskCountBadge" class="bg-slate-100 text-slate-600 py-0.5 px-2 rounded-full text-xs font-bold">0</span>
+                </button>
+            </div>
+            <p class="text-[11px] text-slate-500 ml-1 flex items-center gap-1">
+                <i data-lucide="info" class="w-3 h-3"></i> 
+                Tugas harian ditarik dari database Spreadsheet otomatis.
+            </p>
         </div>
 
         <!-- Error Message Container -->
@@ -189,8 +195,10 @@
 
     <script>
         // --- Konfigurasi ---
-        // Menggunakan link publik CSV acuan awal
+        // Acuan Katalog Produk Utama
         const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8ACyi03DJ77mANO19x_hJV82Xs8rNBBLyT9IIGc1tgYGNrv9WMufjm940iEPx4QU6Eta6T8Ekv2-X/pub?gid=1285691610&single=true&output=csv';
+        // Acuan Database Tugas Harian (Task)
+        const TASK_CSV_URL = 'https://docs.google.com/spreadsheets/d/1LhlFxhO9nbrRanJkuRsx_iRtMfvp5f4g8AFaDSIyOsg/export?format=csv';
         
         // --- State Global ---
         let allProducts = [];
@@ -210,11 +218,27 @@
         // --- Fetch & Parse Data ---
         async function fetchData() {
             try {
-                const response = await fetch(CSV_URL);
-                if (!response.ok) throw new Error('Gagal mengakses data CSV');
+                // Menarik data katalog produk utama dan data task secara bersamaan
+                const [catalogResponse, taskResponse] = await Promise.all([
+                    fetch(CSV_URL),
+                    fetch(TASK_CSV_URL).catch(() => null) // Ignore error jika akses task ditolak/belum diset publik
+                ]);
+
+                if (!catalogResponse.ok) throw new Error('Gagal mengakses data CSV Produk');
                 
-                const csvText = await response.text();
+                const csvText = await catalogResponse.text();
                 allProducts = parseCSV(csvText);
+
+                // Mengolah data Task jika berhasil ditarik
+                if (taskResponse && taskResponse.ok) {
+                    const taskCsvText = await taskResponse.text();
+                    const taskSkus = parseTaskCSV(taskCsvText);
+                    
+                    // Gabungkan task dari spreadsheet database dengan task lokal (jika ada)
+                    taskSkus.forEach(sku => dailyTasks.add(sku));
+                    localStorage.setItem('dailyTasks', JSON.stringify([...dailyTasks]));
+                    updateTaskBadge();
+                }
                 
                 renderTable(allProducts);
             } catch (error) {
@@ -254,6 +278,29 @@
             }).filter(p => p && p.sku && p.nama);
 
             return data;
+        }
+
+        // Fungsi khusus membaca SKU dari file Tugas (Task CSV)
+        function parseTaskCSV(str) {
+            const lines = str.split('\n');
+            if (lines.length < 2) return [];
+
+            // Cari index kolom SKU di spreadsheet Tugas
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, '').toLowerCase());
+            const skuIndex = headers.findIndex(h => h.includes('sku'));
+            
+            if (skuIndex === -1) return []; // Jika tidak ada kolom bersuara 'sku', kembali kosong
+
+            const skus = [];
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                if (!line.trim()) continue;
+                const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                if (values[skuIndex]) {
+                    skus.push(values[skuIndex].trim().replace(/"/g, ''));
+                }
+            }
+            return skus;
         }
 
         // --- Render UI ---
